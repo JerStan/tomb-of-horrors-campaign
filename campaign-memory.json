@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "campaignId": "tomb-of-horrors-seraphina",
+  "campaign": "Tomb of Horrors",
+  "character": "Seraphina Vale",
+  "location": "Bronze Eye Door",
+  "status": "Unharmed; bronze eye door sealed",
+  "stats": {
+    "strength": 5,
+    "nerve": 4,
+    "luck": "2/2"
+  },
+  "inventory": [
+    "Short sword",
+    "Dagger",
+    "Lantern",
+    "Two oil flasks",
+    "50 ft rope",
+    "Chalk",
+    "Ten iron spikes",
+    "Thieves' tools",
+    "Small mirror",
+    "One healing draught",
+    "Ancient parchment"
+  ],
+  "clues": [
+    "Three tomb entrances at the hillside",
+    "Hidden marker compartment held a serpent key and ancient parchment; red glass eye undisturbed",
+    "Serpent key remains in ventilation shaft lock",
+    "Passage pressure plate and ceiling slots discovered",
+    "Ledge with concealed gap; turning wall ring clockwise restored ledge and closed shutters",
+    "Bronze Eye Door displays twelve symbols, three wind emblems and a parchment recess"
+  ],
+  "journal": [
+    "Approached the hillside and examined three tomb entrances.",
+    "Discovered hidden marker compartment and took serpent key and parchment without disturbing red glass eye.",
+    "Unlocked ventilation shaft and concealed right entrance, leaving key in lock.",
+    "Detected passage pressure plate, ceiling slots and a ledge with a concealed gap.",
+    "Turned wall ring clockwise; restored ledge and closed shutters.",
+    "Crossed ledge safely and arrived at Bronze Eye Door.",
+    "Examined the twelve symbols, three wind emblems and parchment recess."
+  ],
+  "objective": "Investigate parchment and wind-symbol opening sequence; door still sealed.",
+  "notes": "",
+  "exploredAreas": [
+    "Hillside / three entrances",
+    "Hidden stone marker",
+    "Ventilation shaft",
+    "Concealed right-hand passage",
+    "Pressure-plate corridor",
+    "Narrow ledge / iron ring",
+    "Bronze Eye Door"
+  ],
+  "mapPolicy": "Append only: never redraw or replace previously explored map areas.",
+  "updatedAt": "2026-11-10T00:00:00.000Z"
+}
