@@ -12,6 +12,11 @@ audio{display:block;width:100%;max-width:32rem;margin:.5rem 0}
 .picture-stage img{flex:none;margin:auto;border:0;border-radius:0;max-width:none;user-select:none}
 .picture-error{margin:auto;padding:1rem}
 @media(max-width:480px){.picture-caption{flex-basis:100%}}
+.picture-strip header,.picture-strip nav,.picture-strip footer,.picture-strip #gallery>h2,.picture-strip #gallery>p{display:none}
+.picture-strip main{padding:.3rem}
+.picture-strip #gallery .grid{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:min(13rem,75%);overflow-x:auto;padding:.25rem;scroll-snap-type:x proximity}
+.picture-strip #gallery .panel{padding:.6rem;scroll-snap-align:start}
+.picture-strip #gallery h3{margin:0 0 .3rem;font-size:1rem}
 </style></head><body>
 <header><p class="tag">GameVault · Public library</p><h1>☠ Tomb of Horrors</h1><p>Seraphina Vale · Solo adventure campaign library</p><span class="tag">Current location: Bronze Eye Door</span></header>
 <nav><button class="active" data-tab="map">Map</button><button data-tab="gallery">Pictures</button><button data-tab="soundtrack">Music &amp; sound effects</button><button data-tab="clues">Clues</button><button data-tab="character">Character</button><button data-tab="journal">Journal</button></nav>
@@ -185,7 +190,12 @@ function openLinkedTab() {
   if (linked) selectTab(linked);
 }
 window.addEventListener('hashchange', openLinkedTab);
-openLinkedTab();
+if (new URLSearchParams(location.search).get('view') === 'pictures') {
+  document.body.classList.add('picture-strip');
+  selectTab(tabs.find(tab => tab.dataset.tab === 'gallery'));
+} else {
+  openLinkedTab();
+}
 
 const pictureLinks = [...document.querySelectorAll('#gallery article a')];
 const viewer = document.querySelector('#picture-viewer');
