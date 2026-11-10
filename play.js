@@ -1,90 +1,85 @@
-/* GameVault Play: no-cost local scene, with persistent journal and optional ChatGPT handoff.
-   This is a bounded scene engine, not an AI server. Never accept or store API keys. */
+/* GameVault Codex gameplay client.
+   The permanent Codex app-server + authoritative SQLite database must run on a secure backend.
+   Do not expose Codex, a local port, or API secrets directly to the internet. */
 (() => {
  'use strict';
- const $ = id=>document.getElementById(id);
- const chat=$('play-chat'), entry=$('play-input'), status=$('play-status');
- const K='gamevault:play:tomb-of-horrors:v1';
- const memory=()=>window.GameVaultMemory;
+ const $=id=>document.getElementById(id);
+ const ENDPOINT='gamevault:server-endpoint:v1';
+ const ACCESS='gamevault:server-access:session:v1';
+ const TURN_HISTORY='gamevault:pending-turns:v1';
+ const getAccess=()=>sessionStorage.getItem(ACCESS)||'';
+ const backend=()=>($('play-endpoint').value||'').trim().replace(/\/+$/,'');
+ const setStatus=(t,bad=false)=>{const el=$('play-status');el.textContent=t;el.style.color=bad?'#ffb2a4':'#d9c69e';};
+ const log=(role,content)=>{
+   const d=document.createElement('div');d.className='play-message '+(role==='You'?'play-player':'play-dm');
+   const title=document.createElement('strong');title.textContent=role;
+   const p=document.createElement('p');p.textContent=String(content||'');
+   d.append(title,p);$('play-transcript').append(d);$('play-transcript').scrollTop=$('play-transcript').scrollHeight;
+ };
  let busy=false;
- function message(role,content){
-   const div=document.createElement('article');div.className='play-message '+(role==='Player'?'play-player':'play-dm');
-   const heading=document.createElement('strong');heading.textContent=role;
-   const p=document.createElement('p');p.textContent=content;
-   div.append(heading,p);chat.append(div);chat.scrollTop=chat.scrollHeight;
- }
- const responses=[
-   {pattern:/^(?:look|observe|survey|inspect|examine)(?: around| room| surroundings| area)?$/i,
-    text:'You stand before the sealed Bronze Eye Door. Twelve bronze symbols form its puzzle face, including skulls, eyes, and three wind emblems. A narrow parchment recess sits beside an enclosed bronze tube and shutter. The passage behind you remains accessible.'},
-   {pattern:/door|bronze eye|symbols|wind|inspect the eye/i,
-    text:'The twelve symbols include skulls, eyes and three winds. Your recorded sequence is Rising Breath → Silent Breath → Falling Breath. The Silent Breath emblem bears HUSH. The bronze door is still sealed; no opening has been attempted.'},
-   {pattern:/parchment|read|writing|recess|tube|shutter/i,
-    text:'The parchment and recess appear central to the mechanism. Your recorded inscription reads: “Let the words be heard before the breath is stilled.” The recess connects to Silent Breath through a bronze tube and shutter. Nothing has been inserted.'},
-   {pattern:/inventory|bag|items|equipment/i,
-    text:'Your inventory includes a short sword, dagger, lantern, two oil flasks, rope, chalk, ten spikes, thieves’ tools, a small mirror, healing draught and ancient parchment. The serpent key remains in the ventilation shaft lock.'},
-   {pattern:/back|retreat|return|passage|ledge/i,
-    text:'You can retrace your route to the narrow ledge and right-hand passage. The clockwise turn of the iron ring previously restored the ledge and closed the ceiling shutters. No new section is revealed.'},
-   {pattern:/mirror|reflect/i,
-    text:'You recall that Skull, Eye and Wind markings were visible only with the mirror. The clue is preserved, but examining the reflection now does not establish a new solution.'},
-   {pattern:/press|turn|touch|insert|place|speak|say|whisper|shout|open|unlock|activate|use|move/i,
-    text:'You prepare to act on the sealed mechanism. The established record does not specify the outcome of this action, so local play will not invent a successful opening or a trap. Continue this action with the ChatGPT Dungeon Master using the handoff below.'}
- ];
- function answer(action){
-   const trimmed=action.trim();
-   if(!trimmed)return;
-   if(busy)return;busy=true;
-   message('Player',trimmed);
-   const match=responses.find(r=>r.pattern.test(trimmed));
-   const reply=match?match.text:'You consider that approach at the Bronze Eye Door. The local scene can recall established clues, but new discoveries and complex actions require the ChatGPT Dungeon Master. Use “Continue in ChatGPT” to resolve this move without fabricating campaign events.';
-   message('Dungeon Master',reply);
+ async function call(action,payload={}){
+   const url=backend();
+   if(!/^https:\/\/[^/?#]+/i.test(url))throw Error('Enter the secure HTTPS GameVault gateway address first.');
+   const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),90000);
    try{
-     const m=memory();
-     if(m) m.addTurn(trimmed,reply);
-     else{
-       const current=JSON.parse(localStorage.getItem(K)||'[]');
-       current.push({action:trimmed,reply,at:new Date().toISOString()});
-       localStorage.setItem(K,JSON.stringify(current.slice(-80)));
-     }
-     status.textContent='Turn saved on this device. Use Memory → Upload for cross-device sync.';
-   }catch(e){status.textContent='Could not save this turn. Download a memory backup.';}
-   entry.value='';busy=false;
+     const r=await fetch(url+action,{
+       method:'POST',headers:{'Content-Type':'application/json',...(getAccess()?{'Authorization':'Bearer '+getAccess()}:{})},
+       body:JSON.stringify(payload),signal:ac.signal,cache:'no-store'});
+     const body=await r.json().catch(()=>({}));
+     if(!r.ok)throw Error(body.error||body.message||'Server returned '+r.status);
+     return body;
+   }finally{clearTimeout(timer);}
  }
- $('play-submit').addEventListener('click',()=>answer(entry.value));
- entry.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();answer(entry.value);}});
- document.querySelectorAll('[data-play-action]').forEach(el=>el.addEventListener('click',()=>answer(el.dataset.playAction)));
- function resumePrompt(){
-   const m=memory()?.get();
-   const snapshot=m?JSON.stringify({character:m.character,location:m.location,status:m.status,stats:m.stats,inventory:m.inventory,clues:m.clues,journal:m.journal.slice(-24),exploredAreas:m.exploredAreas,objective:m.objective,notes:m.notes,mapPolicy:m.mapPolicy}):'Seraphina Vale is unharmed at the sealed Bronze Eye Door; resume from there without changing explored locations.';
-   return 'Act as my solo Tomb of Horrors Dungeon Master. Resume the established GameVault campaign without changing the explored map. Maintain continuity and do not invent previously completed actions. Present the current scene and ask for my next action. After each turn supply a concise structured campaign memory update for GameVault. Current campaign snapshot:\n'+snapshot;
- }
- $('play-copy-prompt').addEventListener('click',async()=>{
-   try{await navigator.clipboard.writeText(resumePrompt());status.textContent='Resume prompt copied. Open ChatGPT and paste it to continue with AI.';}
-   catch(e){$('play-prompt-preview').hidden=false;$('play-prompt-preview').value=resumePrompt();$('play-prompt-preview').select();status.textContent='Select and copy the prompt below, then paste into ChatGPT.';}
+ const saveConfig=()=>{
+   const url=backend();
+   if(!/^https:\/\/[^/?#]+/i.test(url)){setStatus('A secure HTTPS server address is required. No Tailscale or temporary tunnel link.',true);return;}
+   localStorage.setItem(ENDPOINT,url);
+   const access=$('play-access').value.trim();
+   if(access){sessionStorage.setItem(ACCESS,access);$('play-access').value='';}
+   setStatus('Gateway settings saved in this browser. Use Test connection.');
+ };
+ const applyState=s=>{
+   if(!s||typeof s!=='object')return;
+   const m=window.GameVaultMemory;
+   if(!m)return;
+   const old=m.get();
+   if(s.location&&s.location!==old.location)m.setLocation(s.location);
+   if(s.objective&&s.objective!==old.objective)m.setObjective(s.objective);
+   if(Array.isArray(s.newClues))s.newClues.forEach(x=>m.addClue(x));
+   // The server remains authoritative. Mirror individual fields for visibility, never overwrite maps.
+ };
+ $('play-config').addEventListener('click',saveConfig);
+ $('play-test').addEventListener('click',async()=>{
+   if(busy)return;busy=true;setStatus('Checking persistent game server…');
+   try{
+     const result=await call('/v1/game/status',{campaignId:'tomb-of-horrors-seraphina'});
+     $('play-server-state').textContent='Server: '+String(result.status||'connected')+' · Session: '+String(result.session||'unknown')+' · Save: '+String(result.saveBackend||'not reported');
+     if(result.saveBackend!=='sqlite')setStatus('Connected, but the server has not confirmed SQLite authoritative saves.',true);
+     else if(!result.persistentSession)setStatus('Connected, but persistent Codex session not confirmed.',true);
+     else setStatus('Persistent Codex session and SQLite save confirmed.');
+   }catch(e){setStatus('Connection not ready: '+e.message,true);}
+   finally{busy=false;}
  });
- $('play-chatgpt').addEventListener('click',()=>window.open('https://chatgpt.com/','_blank','noopener,noreferrer'));
- function init(){
-   if(chat.childElementCount)return;
-   message('Dungeon Master','Seraphina Vale stands unharmed before the sealed Bronze Eye Door. Twelve symbols and three wind emblems challenge you. Your map, clues, and journal are preserved in GameVault. What do you examine?');
-   status.textContent='Local scene active · No AI API charges · Saves to campaign memory.';
+ async function submit(){
+   const action=$('play-input').value.trim();if(!action||busy)return;
+   busy=true;$('play-send').disabled=true;setStatus('Sending action to persistent Codex game session…');
+   try{
+     const result=await call('/v1/game/turn',{campaignId:'tomb-of-horrors-seraphina',action,clientTurnId:crypto.randomUUID()});
+     if(typeof result.response!=='string'||!result.response.trim())throw Error('Server returned no Dungeon Master response.');
+     log('You',action);log('Dungeon Master',result.response);
+     if(result.state)applyState(result.state);
+     if(window.GameVaultMemory)window.GameVaultMemory.addTurn(action,result.response);
+     $('play-input').value='';
+     setStatus('Turn received. SQLite server is authoritative; the local journal is a convenient mirror.');
+   }catch(e){
+     setStatus('Action was not confirmed or saved by the server: '+e.message+'. Check the server before retrying to avoid duplicate actions.',true);
+   }finally{busy=false;$('play-send').disabled=false;}
  }
- window.addEventListener('gamevault-memory-ready',()=>{
-   // Transfer any play turns logged while memory loaded late.
-   let pending=[];try{pending=JSON.parse(localStorage.getItem(K)||'[]');}catch(e){}
-   if(pending.length&&memory()){
-     pending.forEach(t=>memory().addTurn(t.action,t.reply));
-     localStorage.removeItem(K);
-   }
-   const d=memory()?.get();
-   if(d?.journal?.length){
-     const recent=d.journal.slice(-16);
-     for(let i=0;i<recent.length;i++){
-       if(recent[i].startsWith('Player: ')&&recent[i+1]?.startsWith('Dungeon Master: ')){
-         message('Player',recent[i].slice(8));
-         message('Dungeon Master',recent[i+1].slice(16));
-         i++;
-       }
-     }
-   }
- });
- init();
+ $('play-send').addEventListener('click',submit);
+ $('play-input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submit();}});
+ const saved=localStorage.getItem(ENDPOINT);
+ if(saved)$('play-endpoint').value=saved;
+ $('play-server-state').textContent='Server: not verified';
+ setStatus('Gameplay requires the persistent Codex backend. Configure the secure gateway to begin. The public page cannot run Codex or SQLite itself.');
+ log('GameVault','The game is paused at the Bronze Eye Door. Connect the persistent Codex game server to play here. Maps, pictures and memory remain accessible.');
 })();
