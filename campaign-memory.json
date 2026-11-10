@@ -6,7 +6,9 @@
   "location": "Bronze Eye Door",
   "status": "Unharmed; bronze eye door sealed",
   "stats": {
-    "strength": 5,
+    "hearts": "3/3",
+    "skill": 4,
+    "cunning": 5,
     "nerve": 4,
     "luck": "2/2"
   },
@@ -24,12 +26,15 @@
     "Ancient parchment"
   ],
   "clues": [
-    "Three tomb entrances at the hillside",
-    "Hidden marker compartment held a serpent key and ancient parchment; red glass eye undisturbed",
-    "Serpent key remains in ventilation shaft lock",
-    "Passage pressure plate and ceiling slots discovered",
-    "Ledge with concealed gap; turning wall ring clockwise restored ledge and closed shutters",
-    "Bronze Eye Door displays twelve symbols, three wind emblems and a parchment recess"
+    "Three tomb entrances: 'The first mouth lies. The second mouth hungers. The third mouth waits.'",
+    "Stone marker: 'Follow not the loud mouth. Seek where the dead hill sighs.'",
+    "Silver serpent key and ancient parchment recovered from hidden compartment; red glass eye left untouched.",
+    "Skull, Eye, Wind symbols visible only in a mirror.",
+    "Ventilation shaft emits seven-second air pulses; serpent key remains in shaft grille lock.",
+    "Passage pressure plate below three ceiling slots; clockwise ring turn raised ledge, shuttered slots and closed distant eye.",
+    "Bronze Eye Door: 'What is seen may deceive. What is written may command.' Twelve symbols include skulls, eyes and three winds.",
+    "Wind sequence: Rising Breath → Silent Breath → Falling Breath. Silent Breath symbol bears 'HUSH'.",
+    "Parchment recess connects to Silent Breath by bronze tube and shutter; 'Let the words be heard before the breath is stilled.' No items inserted."
   ],
   "journal": [
     "Approached the hillside and examined three tomb entrances.",
