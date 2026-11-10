@@ -134,7 +134,20 @@
     status(stored?'Restored saved campaign memory on this device.':'Loaded initial campaign record. Local autosave is enabled.');
     if(token()){ $('memory-token').value=token(); $('memory-sync-state').textContent='GitHub sync connected for this browser session';}
     if(!stored) localStorage.setItem(KEY,JSON.stringify(data));
+    window.dispatchEvent(new Event('gamevault-memory-ready'));
   }
+  window.GameVaultMemory={
+    get:()=>JSON.parse(JSON.stringify(data)),
+    addTurn:(action,response)=>{
+      if(!data)throw Error('Campaign memory not ready');
+      data.journal.push('Player: '+clean(action));
+      data.journal.push('Dungeon Master: '+clean(response));
+      localWrite();
+    },
+    addClue:(clue)=>{if(data&&!data.clues.includes(clean(clue)))appendItem('clues',clue);},
+    setObjective:(objective)=>{if(!data)return;data.objective=clean(objective);localWrite();},
+    setLocation:(location)=>{if(!data)return;data.location=clean(location);localWrite();}
+  };
   $('memory-save').addEventListener('click',()=>{
     data.location=clean($('memory-location').value)||data.location;
     data.status=clean($('memory-condition').value);
