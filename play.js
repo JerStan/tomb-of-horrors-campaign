@@ -64,7 +64,15 @@
    const action=$('play-input').value.trim();if(!action||busy)return;
    busy=true;$('play-send').disabled=true;setStatus('Sending action to persistent Codex game session…');
    try{
-     const result=await call('/v1/game/turn',{campaignId:'tomb-of-horrors-seraphina',action,clientTurnId:crypto.randomUUID()});
+     // Reuse the same ID when retrying an unconfirmed action: prevents duplicate turns.
+     let pending=null;
+     try{pending=JSON.parse(localStorage.getItem(TURN_HISTORY)||'null');}catch(e){}
+     if(!pending||pending.action!==action){
+       pending={action,clientTurnId:crypto.randomUUID()};
+       localStorage.setItem(TURN_HISTORY,JSON.stringify(pending));
+     }
+     const result=await call('/v1/game/turn',{campaignId:'tomb-of-horrors-seraphina',...pending});
+     localStorage.removeItem(TURN_HISTORY);
      if(typeof result.response!=='string'||!result.response.trim())throw Error('Server returned no Dungeon Master response.');
      log('You',action);log('Dungeon Master',result.response);
      if(result.state)applyState(result.state);
