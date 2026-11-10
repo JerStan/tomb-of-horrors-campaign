@@ -141,9 +141,13 @@ class Handler(BaseHTTPRequestHandler):
    if not 1<=n<=16000:return self.reply(413,{"error":"Invalid request size"})
    data=json.loads(self.rfile.read(n))
    if self.path=="/v1/game/status":
-    with LOCK,connect() as c:row=c.execute("SELECT * FROM campaigns WHERE id=?",(CAMPAIGN,)).fetchone()
-    alive=codex.p is not None and codex.p.poll() is None
-    return self.reply(200,{"status":"ready" if alive else "not_started","session":row["thread_id"] or "not_started","persistentSession":alive,"saveBackend":"sqlite","checkpointVersion":row["revision"]})
+    with LOCK,connect() as c:
+     codex.run()
+     row=c.execute("SELECT * FROM campaigns WHERE id=?",(CAMPAIGN,)).fetchone()
+     thread_id=codex.thread(c,row)
+     row=c.execute("SELECT * FROM campaigns WHERE id=?",(CAMPAIGN,)).fetchone()
+     alive=codex.p is not None and codex.p.poll() is None
+    return self.reply(200,{"status":"ready" if alive else "not_started","session":thread_id,"persistentSession":alive,"saveBackend":"sqlite","checkpointVersion":row["revision"]})
    if self.path=="/v1/game/turn":return self.reply(200,game_turn(data))
    self.reply(404,{"error":"No such route"})
   except ValueError as e:self.reply(400,{"error":str(e)})
