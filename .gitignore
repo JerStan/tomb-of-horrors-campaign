@@ -1,0 +1,6 @@
+gateway/*.sqlite3
+gateway/*.sqlite3-*
+gateway/__pycache__/
+*.pyc
+.env
+*.secret
