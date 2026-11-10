@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>GameVault | Public library</title>
 <script>
   const query = new URLSearchParams(location.search);
-  const libraryTabs = ['#map', '#gallery', '#soundtrack', '#clues', '#character', '#journal', '#memory'];
+  const libraryTabs = ['#map', '#gallery', '#soundtrack', '#clues', '#character', '#journal', '#memory', '#play'];
   const embeddedLibrary = window.self !== window.top;
   document.documentElement.classList.toggle('embedded-library', embeddedLibrary);
   function updateGameVaultView() {
@@ -56,6 +56,15 @@ nav a{display:inline-flex;align-items:center;min-height:44px;padding:10px 13px;b
 #memory .memory-actions{display:flex;flex-wrap:wrap;gap:.5rem}
 #memory .panel ol{padding-left:1.3rem;overflow-wrap:anywhere}
 #memory button{margin:.2rem .2rem .4rem 0}
+
+#play input,#play textarea{display:block;width:100%;padding:.65rem;border:1px solid #92774f;border-radius:6px;background:#17181b;color:#f6e3c5;font:inherit;margin:.35rem 0 1rem}
+#play label{display:block;color:#ebc88e}
+#play .play-chat{min-height:8rem;max-height:22rem;overflow:auto;padding:.7rem;background:#17181b;border-radius:.5rem;margin:.6rem 0 1rem}
+#play .play-message{margin:.5rem 0;padding:.65rem;border:1px solid #68523b;border-radius:.5rem}
+#play .play-player{margin-left:1.5rem;background:#292e32}
+#play .play-dm{margin-right:1.5rem;background:#2e2924}
+#play .play-message p{margin:.3rem 0;white-space:pre-wrap;overflow-wrap:anywhere}
+#play button{margin:.25rem .5rem .5rem 0}
 </style></head><body>
 <div id="gamevault-home">
   <header>
@@ -89,7 +98,7 @@ nav a{display:inline-flex;align-items:center;min-height:44px;padding:10px 13px;b
 </div>
 <div id="campaign-library">
 <header><p class="tag">GameVault · Public library</p><h1>☠ Tomb of Horrors</h1><p>Seraphina Vale · Solo adventure campaign library</p><span class="tag">Current location: Bronze Eye Door</span></header>
-<nav><a href="./">All games</a><button class="active" data-tab="map">Map</button><button data-tab="gallery">Pictures</button><button data-tab="soundtrack">Music &amp; sound effects</button><button data-tab="clues">Clues</button><button data-tab="character">Character</button><button data-tab="journal">Journal</button><button data-tab="memory">Memory</button></nav>
+<nav><a href="./">All games</a><button class="active" data-tab="map">Map</button><button data-tab="gallery">Pictures</button><button data-tab="soundtrack">Music &amp; sound effects</button><button data-tab="clues">Clues</button><button data-tab="character">Character</button><button data-tab="journal">Journal</button><button data-tab="memory">Memory</button><button data-tab="play">Play</button></nav>
 <main>
 <section id="map" class="active"><h2>Exploration Map</h2><p>Our permanent explored-area map grows only when a new section is discovered. Previously explored areas stay unchanged.</p>
 <div class="panel">
@@ -196,6 +205,34 @@ nav a{display:inline-flex;align-items:center;min-height:44px;padding:10px 13px;b
 <section id="clues"><h2>Clues &amp; Puzzles</h2><div class="grid"><div class="panel"><h3>Three mouths</h3><p>“The first mouth lies. The second mouth hungers. The third mouth waits.”</p></div><div class="panel"><h3>Stone marker</h3><p>“Follow not the loud mouth. Seek where the dead hill sighs.”</p><p>Silver serpent key recovered. Red glass eye left untouched.</p></div><div class="panel"><h3>Hidden symbols</h3><p>Skull · Eye · Wind — visible only in a mirror.</p></div><div class="panel"><h3>Ventilation shaft</h3><p>Seven-second air pulses. Key opened hidden right passage and remains trapped in shaft grille.</p></div><div class="panel"><h3>Passage trap</h3><p>Pressure plate below three ceiling slots. Turning the wall ring clockwise raised the collapsed ledge, shuttered the slots and closed the distant eye.</p></div><div class="panel"><h3>Bronze Eye Door</h3><p>“What is seen may deceive. What is written may command.”</p><p>Twelve bronze symbols include skulls, eyes and three wind symbols.</p></div><div class="panel"><h3>Wind sequence</h3><p>Rising Breath → Silent Breath → Falling Breath. The Silent Breath symbol bears “HUSH”.</p></div><div class="panel"><h3>Parchment recess</h3><p>Connected to Silent Breath via bronze tube and shutter. “Let the words be heard before the breath is stilled.” No items inserted yet.</p></div></div></section>
 <section id="character"><h2>Seraphina Vale</h2><div class="panel"><h3>Tomb-Raider</h3><p><strong>Hearts:</strong> 3/3 · <strong>Skill:</strong> 4 · <strong>Cunning:</strong> 5 · <strong>Nerve:</strong> 4 · <strong>Luck:</strong> 2/2</p><h3>Inventory</h3><p>Short sword, dagger, lantern, two oil flasks, 50 ft rope, chalk, ten iron spikes, thieves' tools, small mirror, one healing draught, ancient parchment.</p><p><strong>Serpent key:</strong> left in ventilation shaft lock.</p><p><strong>Position:</strong> At the Bronze Eye Door, unharmed.</p></div></section>
 <section id="journal"><h2>Adventure Journal</h2><ol><li>Approached the hillside and examined three tomb entrances.</li><li>Discovered hidden marker compartment and took serpent key and parchment without disturbing red glass eye.</li><li>Unlocked ventilation shaft and concealed right entrance, leaving key in lock.</li><li>Detected passage pressure plate, ceiling slots and a ledge with a concealed gap.</li><li>Turned wall ring clockwise; restored ledge and closed shutters.</li><li>Crossed ledge safely and arrived at Bronze Eye Door.</li><li>Examined the twelve symbols, three wind emblems and parchment recess.</li></ol><div class="panel"><strong>Next:</strong> Investigate parchment and wind-symbol opening sequence. Door still sealed.</div></section>
+
+
+<section id="play" aria-label="Play Tomb of Horrors">
+  <h2>Play Tomb of Horrors</h2>
+  <p>Seraphina Vale is at the sealed Bronze Eye Door. Gameplay uses the agreed fast, lower-overhead architecture: one persistent Codex app-server session, compact checkpoints and authoritative SQLite saves—not a fresh Codex run for every turn.</p>
+  <div class="panel">
+    <h3>Connect the permanent game server</h3>
+    <p>The public library cannot run Codex or SQLite on its own. A secure HTTPS gateway must be installed alongside the existing game server before live gameplay works here. Do not enter a temporary Cloudflare tunnel or Tailscale address.</p>
+    <label for="play-endpoint">Secure HTTPS GameVault gateway URL</label>
+    <input id="play-endpoint" type="url" placeholder="https://your-secure-game-gateway.example" autocomplete="url">
+    <label for="play-access">Gateway access token (if required; session only)</label>
+    <input id="play-access" type="password" autocomplete="off" placeholder="Private gateway access token">
+    <div class="memory-actions">
+      <button type="button" id="play-config">Save connection</button>
+      <button type="button" id="play-test">Test connection</button>
+    </div>
+    <p class="muted" id="play-server-state">Server: not verified</p>
+  </div>
+  <div class="panel">
+    <h3>Adventure</h3>
+    <div id="play-transcript" class="play-chat" role="log" aria-label="Adventure transcript" aria-live="polite"></div>
+    <label for="play-input">What does Seraphina do?</label>
+    <textarea id="play-input" rows="3" placeholder="Examine the parchment and the Silent Breath symbol…"></textarea>
+    <button id="play-send" type="button">Send action to Dungeon Master</button>
+    <p id="play-status" role="status" aria-live="polite">Checking setup…</p>
+  </div>
+  <p class="muted">Your Map, Pictures, Journal and Memory remain available above. The server—not the browser—is responsible for applying game rules, saving turns and updating SQLite.</p>
+</section>
 
 <section id="memory" aria-label="Campaign memory">
   <h2>Campaign Memory</h2>
@@ -442,4 +479,4 @@ function endGesture(event) {
 stage.addEventListener('pointerup', endGesture);
 stage.addEventListener('pointercancel', endGesture);
 stage.addEventListener('lostpointercapture', endGesture);
-</script><script src="memory.js" defer></script></body></html>
+</script><script src="memory.js" defer></script><script src="play.js" defer></script></body></html>
