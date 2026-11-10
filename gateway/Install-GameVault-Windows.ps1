@@ -14,6 +14,8 @@ try {
   if (-not (Test-Path (Join-Path $src 'gateway/server.py'))) { throw 'GameVault server source missing from archive.' }
   New-Item -ItemType Directory -Path (Join-Path $dest 'gateway') -Force | Out-Null
   Copy-Item (Join-Path $src 'gateway/server.py') (Join-Path $dest 'gateway/server.py') -Force
+  Copy-Item (Join-Path $src 'gateway/play-bridge.mjs') (Join-Path $dest 'gateway/play-bridge.mjs') -Force
+  Copy-Item (Join-Path $src 'gateway/Start-GameVault-Bridge.ps1') (Join-Path $dest 'Start-GameVault-Bridge.ps1') -Force
   Copy-Item (Join-Path $src 'campaign-memory.json') (Join-Path $dest 'campaign-memory.json') -Force
   $secret = Join-Path $dest 'gateway/access-token.txt'
   if (-not (Test-Path $secret)) {
