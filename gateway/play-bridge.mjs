@@ -27,7 +27,7 @@ if (typeof upstreamAccess !== 'string' || upstreamAccess.length !== 24) {
 }
 
 const entry = '/tomb-of-horrors/';
-const apiPath = /^\/api\/branches\/[ab](?:\/prepare|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?$/;
+const apiPath = /^\/api\/branches\/[ab](?:\/prepare|\/picture-status|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?$/;
 const cookieName = '__Host-gamevault';
 const sessionSeconds = 8 * 60 * 60;
 const responseHeaders = ['content-type', 'cache-control', 'x-content-type-options', 'content-security-policy', 'referrer-policy'];
