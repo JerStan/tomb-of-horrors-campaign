@@ -28,8 +28,8 @@ if (typeof upstreamAccess !== 'string' || upstreamAccess.length !== 24) {
 
 const entry = '/tomb-of-horrors/';
 const stationEntry = '/murder-on-arturus-station/';
-const entries = new Set(['/',entry,stationEntry]);
-const apiPath = /^\/api\/(?:player-tools(?:\?[A-Za-z0-9%+._~=&-]*)?|usage|station\/(?:setup|start)|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
+const entries = new Set(['/',entry,stationEntry,'/s1/','/s1/guide/','/archive/tomb-of-horrors/']);
+const apiPath = /^\/api\/(?:s1\/)?(?:setup|player-tools(?:\?[A-Za-z0-9%+._~=&-]*)?|usage|station\/(?:setup|start)|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
 const cookieName = '__Host-gamevault';
 const sessionSeconds = 8 * 60 * 60;
 const responseHeaders = ['content-type', 'cache-control', 'x-content-type-options', 'content-security-policy', 'referrer-policy'];
@@ -135,6 +135,7 @@ function forward(req, res, page) {
   const backend = request({ hostname, port, method: req.method, path: req.url, headers: upstreamHeaders }, async response => {
     const safe = Object.fromEntries(responseHeaders.flatMap(name =>
       response.headers[name] === undefined ? [] : [[name, response.headers[name]]]));
+    if(page&&entries.has(response.headers.location))safe.location=response.headers.location;
     if (!page || response.statusCode !== 200) {
       res.writeHead(response.statusCode ?? 502, safe);
       return response.pipe(res);
@@ -169,7 +170,7 @@ async function handle(req, res) {
   }
   if (req.url === '/sign-in' && req.method === 'POST') return signIn(req, res);
   const page = req.method === 'GET' && entries.has(req.url);
-  const asset = req.method === 'GET' && ['/player-tools.js','/experience.js'].includes(req.url);
+  const asset = req.method === 'GET' && ['/player-tools.js','/experience.js','/s1/player-tools.js','/s1/experience.js','/s1/s1-client.js'].includes(req.url);
   if (!page && !asset && !apiPath.test(req.url)) return fail(res, 404, 'Page not found.');
   if (!signedIn(req)) {
     if (page) return signInPage(res, false, req.url);
