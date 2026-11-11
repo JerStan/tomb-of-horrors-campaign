@@ -29,7 +29,7 @@ if (typeof upstreamAccess !== 'string' || upstreamAccess.length !== 24) {
 const entry = '/tomb-of-horrors/';
 const stationEntry = '/murder-on-arturus-station/';
 const entries = new Set(['/',entry,stationEntry]);
-const apiPath = /^\/api\/(?:usage|station\/(?:setup|start)|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
+const apiPath = /^\/api\/(?:player-tools(?:\?[A-Za-z0-9%+._~=&-]*)?|usage|station\/(?:setup|start)|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
 const cookieName = '__Host-gamevault';
 const sessionSeconds = 8 * 60 * 60;
 const responseHeaders = ['content-type', 'cache-control', 'x-content-type-options', 'content-security-policy', 'referrer-policy'];
@@ -169,7 +169,8 @@ async function handle(req, res) {
   }
   if (req.url === '/sign-in' && req.method === 'POST') return signIn(req, res);
   const page = req.method === 'GET' && entries.has(req.url);
-  if (!page && !apiPath.test(req.url)) return fail(res, 404, 'Page not found.');
+  const asset = req.method === 'GET' && req.url === '/player-tools.js';
+  if (!page && !asset && !apiPath.test(req.url)) return fail(res, 404, 'Page not found.');
   if (!signedIn(req)) {
     if (page) return signInPage(res, false, req.url);
     return fail(res, 401, 'Your private session has ended. Reload the page to sign in.');
