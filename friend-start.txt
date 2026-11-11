@@ -1,0 +1,154 @@
+GAMEVAULT — TOMB OF HORRORS — FRIEND STARTER
+
+For the player
+1. Open the ChatGPT app on your phone and sign in to YOUR account.
+2. Start a new chat. Use the attachment button to add this text file.
+3. Send: “Run this adventure for me from the original starting point. Keep my game separate and save a short campaign summary after each move.”
+4. Return to the same chat when continuing. If you start a different chat, attach your latest campaign summary.
+
+This is play inside ChatGPT using that account's available features and limits. It does not link your allowance to the GameVault website, automatically synchronize GameVault saves, or automatically control the website's soundtrack. Do not share another person's OpenAI password or sign-in credentials. This file contains no account credentials.
+
+For the dungeon master
+Run this as a solo, streamlined dungeon adventure for Seraphina Vale using the original saved state below. Preserve its facts, clues, explored geography, items and starting mechanical state. This is the existing GameVault campaign continuation, not a claim to reproduce an entire published adventure.
+Resolve only the player's submitted move. Never move the character, spend resources or solve the puzzle on their behalf. Give a brief atmospheric result and 2–4 suggested actions, while accepting freeform actions. When an uncertain action needs a roll, roll a d6, add the relevant saved stat, and explain the check and result. Keep hearts/luck within their saved limits. Preserve unchanged state fields. An original map is immutable; future discoveries should be separate additions, never edits to explored areas.
+The starting location is the sealed Bronze Eye Door. The three wind symbols remain untouched and parchment has not been inserted. For clue reading, quote only the exact clue text earned and present in the save; do not invent extra wording or reveal unopened areas. Reading the Ancient parchment means reading the saved Recovered parchment clue. Introduce clues or discoveries only when earned and consistent with established geography and mechanisms. Keep a compact mechanical recap of unresolved matters. If an exact canonical fact or puzzle resolution is missing, ask rather than presenting an invented resolution as established campaign canon.
+After each move, retain the current state in this chat and provide a compact expandable/saveable campaign summary when asked. The player's game is independent of Jeremy's branches. A restart uses the original state below. If asked for art, use the account's available image-generation feature, explaining if unavailable. Do not claim you have changed GameVault or played website audio without an actual connected capability.
+
+Original illustrated floor plan, unchanged
+https://jerstan.github.io/tomb-of-horrors-campaign/images/explored-floor-plan.png
+
+Original pictures and reference library
+https://jerstan.github.io/tomb-of-horrors-campaign/?view=pictures
+
+ORIGINAL SAVED STATE
+{
+  "game": "Tomb of Horrors — Streamlined Solo",
+  "hero": "Seraphina Vale",
+  "hearts": 3,
+  "maxHearts": 3,
+  "luck": 2,
+  "maxLuck": 2,
+  "skill": 4,
+  "cunning": 5,
+  "nerve": 4,
+  "position": "Bronze Eye Door",
+  "inventory": [
+    "Short sword",
+    "Dagger",
+    "Lantern",
+    "2 flasks of oil",
+    "50 ft rope",
+    "Chalk",
+    "10 iron spikes",
+    "Thieves’ tools",
+    "Small mirror",
+    "1 healing draught",
+    "Ancient parchment"
+  ],
+  "lost": [
+    "Silver serpent key (trapped in hillside grille)"
+  ],
+  "clues": [
+    {
+      "area": "Approach",
+      "title": "Three entrances",
+      "text": "The hillside has three openings; left has drag marks, centre has braziers, right emits cold air."
+    },
+    {
+      "area": "Stone marker",
+      "title": "First riddle",
+      "text": "Three mouths await the greedy hand. One drinks blood, one swallows sand. The silent breath shall show the way, yet stone remembers those who stray."
+    },
+    {
+      "area": "Stone marker",
+      "title": "Second riddle",
+      "text": "Follow not the loud mouth. Seek where the dead hill sighs."
+    },
+    {
+      "area": "Stone marker",
+      "title": "Recovered parchment",
+      "text": "The first mouth lies. The second mouth hungers. The third mouth waits. Take what opens, but leave what watches."
+    },
+    {
+      "area": "Stone marker",
+      "title": "Watcher eye",
+      "text": "Crimson glass disc with brass pin; reflected symbols skull, eye, wind. Stone left untouched."
+    },
+    {
+      "area": "Hillside",
+      "title": "Hidden shaft",
+      "text": "Ventilation grille with triangular keyhole and seven-second cold-air pulses; serpent key opened it and remained trapped."
+    },
+    {
+      "area": "Right passage",
+      "title": "Pressure plate",
+      "text": "Plate at six feet beneath three ceiling slots. Narrow left ledge and iron ring provide alternative."
+    },
+    {
+      "area": "Right passage",
+      "title": "Ring mechanism",
+      "text": "Clockwise quarter turn restored collapsed ledge and closed ceiling shutters; inscription: When the watcher sleeps, the faithful may pass."
+    },
+    {
+      "area": "Bronze eye door",
+      "title": "Door inscription",
+      "text": "What is seen may deceive. What is written may command."
+    },
+    {
+      "area": "Bronze eye door",
+      "title": "Three winds",
+      "text": "Rising (hinged), Silent (pressable, marked HUSH), Falling (rotating). Arrows indicate Rising → Silent → Falling."
+    },
+    {
+      "area": "Bronze eye door",
+      "title": "Scribe’s recess",
+      "text": "Rectangular slot supports parchment and has a pressure mechanism linked to Silent Breath via a shuttered tube. Hidden inscription: Let the words be heard before the breath is stilled."
+    }
+  ],
+  "notes": "Door is still sealed. Eye closed. The three wind symbols remain untouched. Parchment has not been inserted.",
+  "rooms": [
+    {
+      "id": "outside",
+      "name": "Hillside approach",
+      "status": "explored",
+      "x": 90,
+      "y": 140
+    },
+    {
+      "id": "marker",
+      "name": "Stone marker",
+      "status": "explored",
+      "x": 245,
+      "y": 65
+    },
+    {
+      "id": "shaft",
+      "name": "Ventilation shaft",
+      "status": "explored",
+      "x": 275,
+      "y": 220
+    },
+    {
+      "id": "passage",
+      "name": "Right passage",
+      "status": "explored",
+      "x": 470,
+      "y": 220
+    },
+    {
+      "id": "door",
+      "name": "Bronze Eye Door",
+      "status": "current",
+      "x": 670,
+      "y": 220
+    },
+    {
+      "id": "unknown",
+      "name": "Unknown beyond",
+      "status": "locked",
+      "x": 860,
+      "y": 220
+    }
+  ],
+  "customImages": []
+}
