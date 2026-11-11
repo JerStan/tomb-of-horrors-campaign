@@ -29,7 +29,7 @@ if (typeof upstreamAccess !== 'string' || upstreamAccess.length !== 24) {
 const entry = '/tomb-of-horrors/';
 const stationEntry = '/murder-on-arturus-station/';
 const entries = new Set(['/',entry,stationEntry]);
-const apiPath = /^\/api\/(?:station\/(?:setup|start)|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
+const apiPath = /^\/api\/(?:usage|station\/(?:setup|start)|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
 const cookieName = '__Host-gamevault';
 const sessionSeconds = 8 * 60 * 60;
 const responseHeaders = ['content-type', 'cache-control', 'x-content-type-options', 'content-security-policy', 'referrer-policy'];
