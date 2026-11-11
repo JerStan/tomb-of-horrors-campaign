@@ -27,7 +27,9 @@ if (typeof upstreamAccess !== 'string' || upstreamAccess.length !== 24) {
 }
 
 const entry = '/tomb-of-horrors/';
-const apiPath = /^\/api\/(?:backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
+const stationEntry = '/murder-on-arturus-station/';
+const entries = new Set(['/',entry,stationEntry]);
+const apiPath = /^\/api\/(?:station\/(?:setup|start)|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
 const cookieName = '__Host-gamevault';
 const sessionSeconds = 8 * 60 * 60;
 const responseHeaders = ['content-type', 'cache-control', 'x-content-type-options', 'content-security-policy', 'referrer-policy'];
@@ -50,7 +52,7 @@ function fail(res, status, error) {
   res.end(JSON.stringify({ error }));
 }
 
-function signInPage(res, incorrect = false) {
+function signInPage(res, incorrect = false, destination = entry) {
   res.writeHead(incorrect ? 401 : 200, {
     ...headers('text/html; charset=utf-8'),
     'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
@@ -66,8 +68,9 @@ input,button{box-sizing:border-box;width:100%;min-height:44px;font:inherit;paddi
 input{background:#29231f;color:inherit}button{margin-top:.75rem;background:#74502f;color:white}
 a{color:#f4c67f}
 </style>
-<main><h1>GameVault</h1><p>Private Play · Tomb of Horrors</p>
+<main><h1>GameVault</h1><p>Private Play · ${destination === stationEntry ? 'Murder on Arturus Station' : destination === '/' ? 'Choose a game' : 'Tomb of Horrors'}</p>
 <form method="post" action="/sign-in">
+<input type="hidden" name="returnTo" value="${destination}">
 ${incorrect ? '<p role="alert">That code did not match. Please try again.</p>' : ''}
 <label for="code">Private GameVault sign-in code</label>
 <input id="code" name="code" type="password" autocomplete="current-password" required maxlength="64">
@@ -103,17 +106,19 @@ async function signIn(req, res) {
     if (body.length > 512) return fail(res, 413, 'Sign-in request is too large.');
   }
   const fields = new URLSearchParams(body);
+  const destination = fields.get('returnTo') || entry;
+  if (fields.getAll('returnTo').length > 1 || !entries.has(destination)) return fail(res,400,'Choose a GameVault game.');
   const code = fields.get('code')?.trim() || '';
   const digest = createHash('sha256').update(code).digest();
   if (fields.getAll('code').length !== 1 || !timingSafeEqual(digest, signInDigest)) {
-    return signInPage(res, true);
+    return signInPage(res, true, destination);
   }
   const expires = Math.floor(Date.now() / 1000) + sessionSeconds;
   const payload = `${expires}.${randomBytes(16).toString('base64url')}`;
   const value = payload + '.' + signature(payload).toString('base64url');
   res.writeHead(303, {
     ...headers('text/plain; charset=utf-8'),
-    Location: entry,
+    Location: destination,
     'Set-Cookie': `${cookieName}=${value}; Path=/; Max-Age=${sessionSeconds}; Secure; HttpOnly; SameSite=Lax`,
   });
   res.end();
@@ -163,10 +168,10 @@ async function handle(req, res) {
     return fail(res, 403, 'Open GameVault directly.');
   }
   if (req.url === '/sign-in' && req.method === 'POST') return signIn(req, res);
-  const page = req.method === 'GET' && (req.url === '/' || req.url === entry);
+  const page = req.method === 'GET' && entries.has(req.url);
   if (!page && !apiPath.test(req.url)) return fail(res, 404, 'Page not found.');
   if (!signedIn(req)) {
-    if (page) return signInPage(res);
+    if (page) return signInPage(res, false, req.url);
     return fail(res, 401, 'Your private session has ended. Reload the page to sign in.');
   }
   forward(req, res, page);
