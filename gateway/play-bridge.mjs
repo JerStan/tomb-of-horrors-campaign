@@ -169,7 +169,7 @@ async function handle(req, res) {
   }
   if (req.url === '/sign-in' && req.method === 'POST') return signIn(req, res);
   const page = req.method === 'GET' && entries.has(req.url);
-  const asset = req.method === 'GET' && req.url === '/player-tools.js';
+  const asset = req.method === 'GET' && ['/player-tools.js','/experience.js'].includes(req.url);
   if (!page && !asset && !apiPath.test(req.url)) return fail(res, 404, 'Page not found.');
   if (!signedIn(req)) {
     if (page) return signInPage(res, false, req.url);
