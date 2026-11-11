@@ -170,7 +170,7 @@ async function handle(req, res) {
   }
   if (req.url === '/sign-in' && req.method === 'POST') return signIn(req, res);
   const page = req.method === 'GET' && entries.has(req.url);
-  const asset = req.method === 'GET' && ['/player-tools.js','/experience.js','/s1/player-tools.js','/s1/experience.js','/s1/s1-client.js'].includes(req.url);
+  const asset = req.method === 'GET' && ['/player-tools.js','/experience.js','/s1/player-tools.js','/s1/experience.js','/s1/s1-client.js','/s1/journey.js'].includes(req.url);
   if (!page && !asset && !apiPath.test(req.url)) return fail(res, 404, 'Page not found.');
   if (!signedIn(req)) {
     if (page) return signInPage(res, false, req.url);
