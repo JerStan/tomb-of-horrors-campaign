@@ -81,7 +81,7 @@ nav a{display:inline-flex;align-items:center;min-height:44px;padding:10px 13px;b
           <p>Explore Seraphina Vale’s map, pictures, clues, and campaign journal.</p>
         </div>
         <div class="game-actions">
-          <a class="game-link" href="?view=library#play">Play / Connect Dungeon Master</a>
+          <a class="game-link" href="https://5d3tgmqv-8797.aue01.devtunnels.ms/tomb-of-horrors/" rel="noreferrer">Play (invite only)</a>
           <a class="game-link" href="?view=library">Open campaign library</a>
         </div>
       </article>
@@ -209,29 +209,13 @@ nav a{display:inline-flex;align-items:center;min-height:44px;padding:10px 13px;b
 
 <section id="play" aria-label="Play Tomb of Horrors">
   <h2>Play Tomb of Horrors</h2>
-  <p>Seraphina Vale is at the sealed Bronze Eye Door. Gameplay uses the agreed fast, lower-overhead architecture: one persistent Codex app-server session, compact checkpoints and authoritative SQLite saves—not a fresh Codex run for every turn.</p>
+  <p>Continue Seraphina Vale’s adventure with both branches, automatic game audio, pictures and saved history.</p>
   <div class="panel">
-    <h3>Connect the permanent game server</h3>
-    <p>The public library cannot run Codex or SQLite on its own. A secure HTTPS gateway must be installed alongside the existing game server before live gameplay works here. Do not enter a temporary Cloudflare tunnel or Tailscale address.</p>
-    <label for="play-endpoint">Secure HTTPS GameVault gateway URL</label>
-    <input id="play-endpoint" type="url" placeholder="https://your-secure-game-gateway.example" autocomplete="url">
-    <label for="play-access">Gateway access token (if required; session only)</label>
-    <input id="play-access" type="password" autocomplete="off" placeholder="Private gateway access token">
-    <div class="memory-actions">
-      <button type="button" id="play-config">Save connection</button>
-      <button type="button" id="play-test">Test connection</button>
-    </div>
-    <p class="muted" id="play-server-state">Server: not verified</p>
+    <h3>Private Play</h3>
+    <p><a id="private-play-link" class="game-link" href="https://5d3tgmqv-8797.aue01.devtunnels.ms/tomb-of-horrors/" rel="noreferrer">Open private play</a></p>
+    <p>Sign in with the GitHub account invited to the game, then enter your private GameVault code.</p>
+    <p>Your laptop and phone use the same saved adventure. Keep the laptop awake and online while you play.</p>
   </div>
-  <div class="panel">
-    <h3>Adventure</h3>
-    <div id="play-transcript" class="play-chat" role="log" aria-label="Adventure transcript" aria-live="polite"></div>
-    <label for="play-input">What does Seraphina do?</label>
-    <textarea id="play-input" rows="3" placeholder="Examine the parchment and the Silent Breath symbol…"></textarea>
-    <button id="play-send" type="button">Send action to Dungeon Master</button>
-    <p id="play-status" role="status" aria-live="polite">Checking setup…</p>
-  </div>
-  <p class="muted">Your Map, Pictures, Journal and Memory remain available above. The server—not the browser—is responsible for applying game rules, saving turns and updating SQLite.</p>
 </section>
 
 <section id="memory" aria-label="Campaign memory">

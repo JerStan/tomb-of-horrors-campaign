@@ -3,6 +3,7 @@
    Do not expose Codex, a local port, or API secrets directly to the internet. */
 (() => {
  'use strict';
+ if (document.getElementById('private-play-link')) return;
  const $=id=>document.getElementById(id);
  const ENDPOINT='gamevault:server-endpoint:v1';
  const ACCESS='gamevault:server-access:session:v1';
