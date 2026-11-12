@@ -1,8 +1,8 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { readFileSync,readdirSync } from 'node:fs';
 import { createServer, request } from 'node:http';
 import { isIPv4 } from 'node:net';
-import { isAbsolute } from 'node:path';
+import { isAbsolute,dirname,join } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
 const configuration = process.argv[2];
@@ -26,10 +26,11 @@ if (typeof upstreamAccess !== 'string' || upstreamAccess.length !== 24) {
   throw new Error('GameVault could not read the existing game access settings.');
 }
 
-const entry = '/tomb-of-horrors/';
-const stationEntry = '/murder-on-arturus-station/';
-const entries = new Set(['/',entry,stationEntry,'/s1/','/s1/guide/','/archive/tomb-of-horrors/']);
-const apiPath = /^\/api\/(?:s1\/)?(?:setup|player-tools(?:\?[A-Za-z0-9%+._~=&-]*)?|usage|station\/(?:setup|start)|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
+const packagesDir=join(dirname(dirname(upstream.database)),'games');
+const packages=readdirSync(packagesDir,{withFileTypes:true}).filter(e=>e.isDirectory()).map(e=>JSON.parse(readFileSync(join(packagesDir,e.name,'game.json'),'utf8')));
+const entry='/',publicLibrary=packages.find(p=>p.default)?.publicLibrary||'/',entries=new Set(['/',...packages.flatMap(p=>[p.mount,...(p.aliases||[]),...(p.pages||[]).map(page=>p.mount+page)])]);
+const roots=['/api',...packages.map(p=>p.api),...packages.flatMap(p=>(p.apiAliases||[]).map(a=>a.prefix.replace(/\/$/,'')))].sort((a,b)=>b.length-a.length);
+const apiPath={test(url){return roots.some(root=>url.startsWith(root+'/')&&/^\/(?:game-catalog|game-tokens|setup|start|player-tools(?:\?[A-Za-z0-9%+._~=&-]*)?|usage|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/.test(url.slice(root.length)));}};
 const cookieName = '__Host-gamevault';
 const sessionSeconds = 8 * 60 * 60;
 const rememberedSeconds = 90 * 24 * 60 * 60;
@@ -69,7 +70,7 @@ input,button{box-sizing:border-box;width:100%;min-height:44px;font:inherit;paddi
 input{background:#29231f;color:inherit}button{margin-top:.75rem;background:#74502f;color:white}
 a{color:#f4c67f}
 </style>
-<main><h1>GameVault</h1><p>Private Play · ${destination === stationEntry ? 'Murder on Arturus Station' : destination === '/' ? 'Choose a game' : 'Tomb of Horrors'}</p>
+<main><h1>GameVault</h1><p>Private Play · ${destination === '/' ? 'Choose a game' : (packages.find(p=>p.mount===destination||(p.aliases||[]).includes(destination))?.title||'Campaign library').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
 <form method="post" action="/sign-in">
 <input type="hidden" name="returnTo" value="${destination}">
 ${incorrect ? '<p role="alert">That code did not match. Please try again.</p>' : ''}
@@ -79,7 +80,7 @@ ${incorrect ? '<p role="alert">That code did not match. Please try again.</p>' :
 <p>Use this only on your own device. Clearing browser cookies will sign you out.</p>
 <button type="submit">Enter GameVault</button>
 </form>
-<p><a href="https://jerstan.github.io/tomb-of-horrors-campaign/">Return to the public library</a></p>
+<p><a href="${publicLibrary}">Return to the public library</a></p>
 </main></html>`);
 }
 
@@ -175,7 +176,7 @@ async function handle(req, res) {
   }
   if (req.url === '/sign-in' && req.method === 'POST') return signIn(req, res);
   const page = req.method === 'GET' && entries.has(req.url);
-  const asset = req.method === 'GET' && ['/player-tools.js','/experience.js','/s1/player-tools.js','/s1/experience.js','/s1/s1-client.js','/s1/floorplan.js','/s1/journey.js','/s1/presentation.js','/s1/opening.png'].includes(req.url);
+  const asset = req.method === 'GET' && (['/player-tools.js','/experience.js'].includes(req.url)||packages.some(p=>req.url.startsWith(p.mount)&&/^(?:[a-z0-9_-]+\/)*[a-z0-9_-]+\.(?:js|css|png|jpe?g|webp|avif|gif|svg)$/.test(req.url.slice(p.mount.length))));
   if (!page && !asset && !apiPath.test(req.url)) return fail(res, 404, 'Page not found.');
   if (!signedIn(req)) {
     if (page) return signInPage(res, false, req.url);

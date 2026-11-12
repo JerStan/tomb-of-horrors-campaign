@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "games": [
+    {
+      "id": "murder-on-arturus-station",
+      "title": "Murder on Arturus Station",
+      "subtitle": "Classic Traveller",
+      "description": "Prepare your investigator for the published station mystery. Full adventure source is still required before play.",
+      "mount": "/murder-on-arturus-station/",
+      "api": "/api/station-game",
+      "stage": "preparing",
+      "links": [
+        {
+          "label": "Published adventure overview",
+          "href": "station-overview.html"
+        }
+      ],
+      "href": "https://5d3tgmqv-8797.aue01.devtunnels.ms/murder-on-arturus-station/",
+      "action": "Campaign preparation"
+    },
+    {
+      "id": "tomb-of-horrors",
+      "title": "Tomb of Horrors",
+      "subtitle": "Original S1 · AD&D or solo adaptation",
+      "description": "Begin the original published adventure with your choice of rules.",
+      "mount": "/s1/",
+      "api": "/api/s1",
+      "stage": "playable",
+      "links": [
+        {
+          "label": "Open archived custom campaign library",
+          "href": "?view=library"
+        }
+      ],
+      "href": "https://5d3tgmqv-8797.aue01.devtunnels.ms/s1/",
+      "action": "Play original S1 (invite only)"
+    }
+  ]
+}
