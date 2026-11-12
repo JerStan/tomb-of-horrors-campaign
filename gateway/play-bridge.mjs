@@ -32,6 +32,7 @@ const entries = new Set(['/',entry,stationEntry,'/s1/','/s1/guide/','/archive/to
 const apiPath = /^\/api\/(?:s1\/)?(?:setup|player-tools(?:\?[A-Za-z0-9%+._~=&-]*)?|usage|station\/(?:setup|start)|backup|restore|branches(?:\/[a-z][a-z0-9-]{0,47}(?:\/prepare|\/picture-status|\/preferences|\/rename|\/activity|\/archive\?after=\d+|\/pictures(?:\/[a-f0-9]{32})?)?)?)$/;
 const cookieName = '__Host-gamevault';
 const sessionSeconds = 8 * 60 * 60;
+const rememberedSeconds = 90 * 24 * 60 * 60;
 const responseHeaders = ['content-type', 'cache-control', 'x-content-type-options', 'content-security-policy', 'referrer-policy'];
 const nativeAccess = "let access = sessionStorage.getItem('gamevault-access') || '';";
 const remoteAccess = "let access = 'signed-in';";
@@ -74,6 +75,8 @@ a{color:#f4c67f}
 ${incorrect ? '<p role="alert">That code did not match. Please try again.</p>' : ''}
 <label for="code">Private GameVault sign-in code</label>
 <input id="code" name="code" type="password" autocomplete="current-password" required maxlength="64">
+<label style="display:flex;align-items:center;gap:.6rem"><input type="checkbox" name="remember" value="yes" style="width:1.25rem;min-height:1.25rem;height:1.25rem;padding:0">Remember this device for 90 days</label>
+<p>Use this only on your own device. Clearing browser cookies will sign you out.</p>
 <button type="submit">Enter GameVault</button>
 </form>
 <p><a href="https://jerstan.github.io/tomb-of-horrors-campaign/">Return to the public library</a></p>
@@ -113,13 +116,15 @@ async function signIn(req, res) {
   if (fields.getAll('code').length !== 1 || !timingSafeEqual(digest, signInDigest)) {
     return signInPage(res, true, destination);
   }
-  const expires = Math.floor(Date.now() / 1000) + sessionSeconds;
+  if(fields.getAll('remember').length>1 || (fields.has('remember') && fields.get('remember')!=='yes'))return fail(res,400,'Invalid remember-device choice.');
+  const duration = fields.get('remember') === 'yes' ? rememberedSeconds : sessionSeconds;
+  const expires = Math.floor(Date.now() / 1000) + duration;
   const payload = `${expires}.${randomBytes(16).toString('base64url')}`;
   const value = payload + '.' + signature(payload).toString('base64url');
   res.writeHead(303, {
     ...headers('text/plain; charset=utf-8'),
     Location: destination,
-    'Set-Cookie': `${cookieName}=${value}; Path=/; Max-Age=${sessionSeconds}; Secure; HttpOnly; SameSite=Lax`,
+    'Set-Cookie': `${cookieName}=${value}; Path=/; Max-Age=${duration}; Secure; HttpOnly; SameSite=Lax`,
   });
   res.end();
 }
@@ -170,7 +175,7 @@ async function handle(req, res) {
   }
   if (req.url === '/sign-in' && req.method === 'POST') return signIn(req, res);
   const page = req.method === 'GET' && entries.has(req.url);
-  const asset = req.method === 'GET' && ['/player-tools.js','/experience.js','/s1/player-tools.js','/s1/experience.js','/s1/s1-client.js','/s1/journey.js'].includes(req.url);
+  const asset = req.method === 'GET' && ['/player-tools.js','/experience.js','/s1/player-tools.js','/s1/experience.js','/s1/s1-client.js','/s1/journey.js','/s1/presentation.js','/s1/opening.png'].includes(req.url);
   if (!page && !asset && !apiPath.test(req.url)) return fail(res, 404, 'Page not found.');
   if (!signedIn(req)) {
     if (page) return signInPage(res, false, req.url);
