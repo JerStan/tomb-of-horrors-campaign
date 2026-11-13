@@ -5,10 +5,10 @@
       "id": "murder-on-arturus-station",
       "title": "Murder on Arturus Station",
       "subtitle": "Classic Traveller",
-      "description": "Prepare your investigator for the published station mystery. Full adventure source is still required before play.",
+      "description": "Investigate a murder aboard Station Three using the original Classic Traveller adventure.",
       "mount": "/murder-on-arturus-station/",
       "api": "/api/station-game",
-      "stage": "preparing",
+      "stage": "playable",
       "links": [
         {
           "label": "Published adventure overview",
@@ -16,7 +16,7 @@
         }
       ],
       "href": "https://5d3tgmqv-8797.aue01.devtunnels.ms/murder-on-arturus-station/",
-      "action": "Campaign preparation"
+      "action": "Open investigation"
     },
     {
       "id": "tomb-of-horrors",
