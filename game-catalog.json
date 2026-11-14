@@ -2,6 +2,18 @@
   "version": 1,
   "games": [
     {
+      "id": "ellery-queen",
+      "title": "Ellery Queen · The Lockridge Tea Party",
+      "subtitle": "Rebuilt country-house mystery",
+      "description": "Investigate Spencer Lockridge’s disappearance in a clearly labelled reconstruction of the recovered tea-party campaign.",
+      "mount": "/ellery-queen/",
+      "api": "/api/ellery-queen",
+      "stage": "playable",
+      "links": [],
+      "href": "https://5d3tgmqv-8797.aue01.devtunnels.ms/ellery-queen/",
+      "action": "Open mystery"
+    },
+    {
       "id": "murder-on-arturus-station",
       "title": "Murder on Arturus Station",
       "subtitle": "Classic Traveller",
