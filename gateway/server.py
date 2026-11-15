@@ -3,6 +3,7 @@
 import hmac,json,os,queue,re,sqlite3,subprocess,threading,time
 from pathlib import Path
 from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
+from rules_engine import apply_mechanics, gm_guidance, preferences, MechanicsError
 ROOT=Path(__file__).resolve().parent
 DB=Path(os.environ.get("GAMEVAULT_DB",ROOT/"gamevault.sqlite3"))
 TOKEN=os.environ.get("GAMEVAULT_ACCESS_TOKEN","")
@@ -56,7 +57,9 @@ class Codex:
    self.rpc("thread/resume",{"threadId":row["thread_id"]},30)
    return row["thread_id"]
   params={"cwd":str(ROOT),"approvalPolicy":"never","sandbox":"read-only"}
-  if os.environ.get("GAMEVAULT_CODEX_MODEL"):params["model"]=os.environ["GAMEVAULT_CODEX_MODEL"]
+  selected=preferences(json.loads(row["state"]))["model"]
+  if selected!="default":params["model"]=selected
+  elif os.environ.get("GAMEVAULT_CODEX_MODEL"):params["model"]=os.environ["GAMEVAULT_CODEX_MODEL"]
   t=self.rpc("thread/start",params,60).get("thread",{}).get("id")
   if not t:raise RuntimeError("Codex did not return thread id")
   c.execute("UPDATE campaigns SET thread_id=? WHERE id=?",(t,CAMPAIGN));c.commit()
@@ -88,7 +91,8 @@ Treat the provided SQLite state as authoritative. Never overwrite, redraw, or re
 Be concise, atmospheric and faithful to prior history. Do not use tools or edit files.
 Return ONLY a JSON object with keys: response (narration string), location (string),
 objective (string), condition (string), newClues (string array), newExploredAreas (string array),
-inventory (complete string array). Use unchanged state for unchanged fields.
+inventory (complete string array), durationRounds (nonnegative integer),
+isClarification (boolean). Use unchanged state for unchanged fields.
 """
 def game_turn(req):
  if req.get("campaignId")!=CAMPAIGN:raise ValueError("Unknown campaign")
@@ -103,7 +107,7 @@ def game_turn(req):
   row=c.execute("SELECT * FROM campaigns WHERE id=?",(CAMPAIGN,)).fetchone()
   state=json.loads(row["state"])
   codex.run();thread=codex.thread(c,row)
-  raw=codex.turn(thread,INSTRUCTIONS+"\nSTATE: "+json.dumps(state,ensure_ascii=False,separators=(",",":"))+"\nACTION: "+action)
+  raw=codex.turn(thread,INSTRUCTIONS+"\n"+gm_guidance(state)+"\nSTATE: "+json.dumps(state,ensure_ascii=False,separators=(",",":"))+"\nACTION: "+action)
   try:out=json.loads(raw.strip())
   except ValueError:raise RuntimeError("Codex narration is not valid JSON; no state committed")
   if not isinstance(out,dict) or not isinstance(out.get("response"),str):raise RuntimeError("Invalid Codex narration")
@@ -116,10 +120,14 @@ def game_turn(req):
      state.setdefault(dest,[]).append(v[:1000])
      if source=="newClues":new_clues.append(v[:1000])
   if isinstance(out.get("inventory"),list) and all(isinstance(x,str) for x in out["inventory"]):state["inventory"]=out["inventory"][:100]
+  # Only explicit clarification requests can be charged zero; the model cannot
+  # silently relabel movement or another actual action as a clarification.
+  clarification=bool(out.get("isClarification")) and bool(re.match(r"^\s*(?:clarify|explain|what did you mean|what does that mean)\b",action,re.I))
+  state,mechanics=apply_mechanics(state,out,clarification=clarification)
   state.setdefault("journal",[]).extend(["Player: "+action,"Dungeon Master: "+out["response"]])
   state["updatedAt"]=time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime())
   rev=row["revision"]+1
-  result={"response":out["response"],"turnId":rev,"saveBackend":"sqlite","state":{"location":state.get("location"),"objective":state.get("objective"),"newClues":new_clues}}
+  result={"response":out["response"],"turnId":rev,"saveBackend":"sqlite","state":{"location":state.get("location"),"objective":state.get("objective"),"newClues":new_clues,"mechanics":{"actionCount":mechanics.action_count,"elapsedRounds":mechanics.rounds,"elapsedMinutes":mechanics.minutes}}}
   with c:
    c.execute("INSERT INTO turns VALUES(?,?,?,?)",(CAMPAIGN,rid,action,json.dumps(result,ensure_ascii=False)))
    c.execute("UPDATE campaigns SET state=?,revision=? WHERE id=?",(json.dumps(state,ensure_ascii=False),rev,CAMPAIGN))
