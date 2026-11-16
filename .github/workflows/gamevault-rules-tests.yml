@@ -1,0 +1,22 @@
+name: GameVault mechanics regression tests
+on:
+  push:
+    branches:
+      - main
+      - 'fix/**'
+  pull_request:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compile game server and shared engine
+        run: python -m py_compile gateway/server.py gateway/rules_engine.py
+      - name: Run all rules regression tests
+        run: python -m unittest discover -s gateway/tests -v
